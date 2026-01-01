@@ -13,7 +13,7 @@ public record RecommendResultDto(
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (CoachRecommendResultDto dto : coachRecommendResultDtos) {
-            stringBuilder.append(dto.toString());
+            stringBuilder.append(dto.toString()).append("\n");
         }
 
         return stringBuilder.toString();
