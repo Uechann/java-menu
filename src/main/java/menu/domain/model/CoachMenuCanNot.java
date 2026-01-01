@@ -23,4 +23,12 @@ public class CoachMenuCanNot {
     public List<Menu> getMenus() {
         return menus;
     }
+
+    public boolean containsMenu(String menuName) {
+        List<String> menuNames = menus.stream()
+                .map(Menu::getName)
+                .toList();
+
+        return menuNames.contains(menuName);
+    }
 }

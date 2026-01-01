@@ -15,4 +15,35 @@ public class MenuRecommend {
 
     // 메뉴
     private Menu menu;
+
+    private MenuRecommend(DayOfWeek dayOfWeek, MenuCategory category, Coach coach, Menu menu) {
+        this.dayOfWeek = dayOfWeek;
+        this.category = category;
+        this.coach = coach;
+        this.menu = menu;
+    }
+
+    public static MenuRecommend create(DayOfWeek dayOfWeek, MenuCategory category, Coach coach, Menu menu) {
+        return new MenuRecommend(dayOfWeek, category, coach, menu);
+    }
+
+    public DayOfWeek getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public MenuCategory getCategory() {
+        return category;
+    }
+
+    public Coach getCoach() {
+        return coach;
+    }
+
+    public Menu getMenu() {
+        return menu;
+    }
+
+    public boolean isCoach(Coach coach) {
+        return this.coach.equals(coach);
+    }
 }

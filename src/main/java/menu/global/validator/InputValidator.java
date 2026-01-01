@@ -10,7 +10,7 @@ public class InputValidator {
         // 코치는 최소 2명, 최대 5명까지 함께 식사
         // 쉼표와 공백을 제외한 모든 문자
         // 쉼표로 구분된 문자열
-        String coachNameInputRegex = "^[^,\\s]{2,4}(,[^,\\s]{2,4})$";
+        String coachNameInputRegex = "^[^,\\s]{2,4}(,[^,\\s]{2,4})*$";
 
         if (!input.matches(coachNameInputRegex)) {
             throw new IllegalArgumentException(INVALID_COACH_NAME.getMessage());
@@ -19,7 +19,7 @@ public class InputValidator {
 
     public void validateCoachMenuCanNot(String input) {
         // 최소 0개 최대 2개 못먹는 메뉴 검증
-        String coachMenuCanNotInputRegex = "^[^,\\s](,[^,\\s])$";
+        String coachMenuCanNotInputRegex = "^[^,\\s]*(,[^,\\s]*)*$";
 
         if (!input.matches(coachMenuCanNotInputRegex)) {
             throw new IllegalArgumentException(INVALID_COACH_MENU_CAN_NOT.getMessage());

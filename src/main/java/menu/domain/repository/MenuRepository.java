@@ -15,6 +15,10 @@ public class MenuRepository {
         return menus.get(menuName);
     }
 
+    public List<Menu> findAll() {
+        return new ArrayList<>(menus.values());
+    }
+
     public boolean isPresent(String menuName) {
         return menus.containsKey(menuName);
     }
