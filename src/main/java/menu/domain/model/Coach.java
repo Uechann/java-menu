@@ -4,7 +4,6 @@ import static menu.global.exception.ErrorMessage.INVALID_COACH_NAME_LENGTH;
 
 public class Coach {
 
-    private Long id;
     private String name;
 
     private Coach(String name) {
@@ -17,10 +16,6 @@ public class Coach {
         }
 
         return new Coach(name);
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {

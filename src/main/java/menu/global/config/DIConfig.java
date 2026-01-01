@@ -1,10 +1,13 @@
 package menu.global.config;
 
 import menu.controller.MenuController;
+import menu.domain.model.Coach;
+import menu.domain.repository.CoachMenuCanNotRepository;
 import menu.domain.repository.CoachRepository;
 import menu.domain.repository.MenuRepository;
 import menu.domain.service.InitialService;
 import menu.domain.service.MenuRecommendService;
+import menu.global.util.CoachMenuParser;
 import menu.global.util.CoachNameParser;
 import menu.global.util.Parser;
 import menu.global.validator.InputValidator;
@@ -15,6 +18,7 @@ public final class DIConfig {
 
     private final CoachRepository coachRepository = new CoachRepository();
     private final MenuRepository menuRepository = new MenuRepository();
+    private final CoachMenuCanNotRepository coachMenuCanNotRepository = new CoachMenuCanNotRepository();
 
     public CoachRepository coachRepository() {
         return coachRepository;
@@ -24,17 +28,23 @@ public final class DIConfig {
         return menuRepository;
     }
 
+    public CoachMenuCanNotRepository coachMenuCanNotRepository() {
+        return coachMenuCanNotRepository;
+    }
+
     public InitialService initialService() {
         return new InitialService(
                 menuRepository(),
-                coachRepository()
+                coachRepository(),
+                coachMenuCanNotRepository()
         );
     }
 
     public MenuRecommendService menuRecommendService() {
         return new MenuRecommendService(
                 menuRepository(),
-                coachRepository()
+                coachRepository(),
+                coachMenuCanNotRepository()
         );
     }
 
@@ -54,6 +64,10 @@ public final class DIConfig {
         return new CoachNameParser();
     }
 
+    public Parser<String> coachMenuParser() {
+        return new CoachMenuParser();
+    }
+
     public MenuController menuController() {
         return new MenuController(
                 initialService(),
@@ -61,7 +75,8 @@ public final class DIConfig {
                 inputView(),
                 outputView(),
                 inputValidator(),
-                coachNameParser()
+                coachNameParser(),
+                coachMenuParser()
         );
     }
 }

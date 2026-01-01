@@ -1,23 +1,29 @@
 package menu.domain.service;
 
 import menu.domain.model.Coach;
+import menu.domain.model.CoachMenuCanNot;
 import menu.domain.model.Menu;
 import menu.domain.model.MenuCategory;
+import menu.domain.repository.CoachMenuCanNotRepository;
 import menu.domain.repository.CoachRepository;
 import menu.domain.repository.MenuRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static menu.global.exception.ErrorMessage.INVALID_COACH_COUNT;
+import static menu.global.exception.ErrorMessage.*;
 
 public class InitialService {
 
     private final MenuRepository menuRepository;
     private final CoachRepository coachRepository;
+    private final CoachMenuCanNotRepository coachMenuCanNotRepository;
 
-    public InitialService(MenuRepository menuRepository, CoachRepository coachRepository) {
+    public InitialService(MenuRepository menuRepository, CoachRepository coachRepository, CoachMenuCanNotRepository coachMenuCanNotRepository) {
         this.menuRepository = menuRepository;
         this.coachRepository = coachRepository;
+        this.coachMenuCanNotRepository = coachMenuCanNotRepository;
     }
 
     /*
@@ -33,6 +39,36 @@ public class InitialService {
         initialChainaMenu();
         initialAsiaMenu();
         initialWesternMenu();
+    }
+
+
+    public List<String> initialCoach(List<String> coachNames) {
+        if (coachNames.size() < 2 || coachNames.size() > 5) {
+            throw new IllegalArgumentException(INVALID_COACH_COUNT.getMessage());
+        }
+
+        for (String coachName : coachNames) {
+            Coach coach = Coach.create(coachName);
+            coachRepository.save(coach);
+        }
+        return coachNames;
+    }
+
+    public void initialCoachMenuCanNot(String coachName, List<String> coachMenuCanNot) {
+        Coach coach = coachRepository.findByName(coachName)
+                .orElseThrow(() -> new IllegalArgumentException(COACH_NOT_FOUND.getMessage()));
+
+        if (!coachMenuCanNot.isEmpty()) {
+            if (coachMenuCanNot.size() > 2) {
+                throw new IllegalArgumentException(MENU_COUNT_OVER.getMessage());
+            }
+            List<Menu> canNotMenus = coachMenuCanNot.stream()
+                    .filter(menuRepository::isPresent)
+                    .map(menuRepository::findByName)
+                    .toList();
+            coachMenuCanNotRepository.save(CoachMenuCanNot.create(coach, canNotMenus));
+        }
+
     }
 
     private void initialWesternMenu() {
@@ -93,17 +129,5 @@ public class InitialService {
         menuRepository.save(Menu.create(MenuCategory.KOREA, "불고기"));
         menuRepository.save(Menu.create(MenuCategory.KOREA, "떡볶이"));
         menuRepository.save(Menu.create(MenuCategory.KOREA, "제육볶음"));
-    }
-
-    public List<String> initialCoach(List<String> coachNames) {
-        if (coachNames.size() < 2 || coachNames.size() > 5) {
-            throw new IllegalArgumentException(INVALID_COACH_COUNT.getMessage());
-        }
-
-        for (String coachName : coachNames) {
-            Coach coach = Coach.create(coachName);
-            coachRepository.save(coach);
-        }
-        return coachNames;
     }
 }

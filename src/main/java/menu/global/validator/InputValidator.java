@@ -1,5 +1,6 @@
 package menu.global.validator;
 
+import static menu.global.exception.ErrorMessage.INVALID_COACH_MENU_CAN_NOT;
 import static menu.global.exception.ErrorMessage.INVALID_COACH_NAME;
 
 public class InputValidator {
@@ -13,6 +14,15 @@ public class InputValidator {
 
         if (!input.matches(coachNameInputRegex)) {
             throw new IllegalArgumentException(INVALID_COACH_NAME.getMessage());
+        }
+    }
+
+    public void validateCoachMenuCanNot(String input) {
+        // 최소 0개 최대 2개 못먹는 메뉴 검증
+        String coachMenuCanNotInputRegex = "^[^,\\s](,[^,\\s])$";
+
+        if (!input.matches(coachMenuCanNotInputRegex)) {
+            throw new IllegalArgumentException(INVALID_COACH_MENU_CAN_NOT.getMessage());
         }
     }
 }

@@ -15,4 +15,12 @@ public class CoachMenuCanNot {
     public static CoachMenuCanNot create(Coach coach, List<Menu> menus) {
         return new CoachMenuCanNot(coach, menus);
     }
+
+    public Coach getCoach() {
+        return coach;
+    }
+
+    public List<Menu> getMenus() {
+        return menus;
+    }
 }

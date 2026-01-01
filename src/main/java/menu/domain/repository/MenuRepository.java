@@ -2,17 +2,20 @@ package menu.domain.repository;
 
 import menu.domain.model.Menu;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MenuRepository {
-    private final List<Menu> menus = new ArrayList<>();
+    private final Map<String, Menu> menus = new HashMap<>();
 
     public void save(Menu menu) {
-        menus.add(menu);
+        menus.put(menu.getName(), menu);
     }
 
-    public void saveAll(List<Menu> menus) {
-        menus.addAll(menus);
+    public Menu findByName(String menuName) {
+        return menus.get(menuName);
+    }
+
+    public boolean isPresent(String menuName) {
+        return menus.containsKey(menuName);
     }
 }
