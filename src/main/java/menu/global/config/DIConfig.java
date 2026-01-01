@@ -5,6 +5,11 @@ import menu.domain.repository.CoachRepository;
 import menu.domain.repository.MenuRepository;
 import menu.domain.service.InitialService;
 import menu.domain.service.MenuRecommendService;
+import menu.global.util.CoachNameParser;
+import menu.global.util.Parser;
+import menu.global.validator.InputValidator;
+import menu.view.InputView;
+import menu.view.OutputView;
 
 public final class DIConfig {
 
@@ -33,10 +38,30 @@ public final class DIConfig {
         );
     }
 
+    public InputView inputView() {
+        return new InputView();
+    }
+
+    public OutputView outputView() {
+        return new OutputView();
+    }
+
+    public InputValidator inputValidator() {
+        return new InputValidator();
+    }
+
+    public Parser<String> coachNameParser() {
+        return new CoachNameParser();
+    }
+
     public MenuController menuController() {
         return new MenuController(
                 initialService(),
-                menuRecommendService()
+                menuRecommendService(),
+                inputView(),
+                outputView(),
+                inputValidator(),
+                coachNameParser()
         );
     }
 }

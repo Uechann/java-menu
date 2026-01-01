@@ -5,9 +5,13 @@ public class Menu {
     private final MenuCategory category;
     private final String name;
 
-    public Menu(MenuCategory category, String name) {
+    private Menu(MenuCategory category, String name) {
         this.category = category;
         this.name = name;
+    }
+
+    public static Menu create(MenuCategory menuCategory, String name) {
+        return new Menu(menuCategory, name);
     }
 
     public MenuCategory getCategory() {
