@@ -43,20 +43,12 @@ public class MenuRecommendService {
         }
 
         List<Coach> coaches = coachRepository.findAll();
-        List<String> menuCategories = new ArrayList<>();
-        // 요일별 진행
-        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-            if (dayOfWeek.equals(DayOfWeek.SATURDAY)) {
-                break;
-            }
-            MenuCategory category = recommendMenuCategory(categoryCount, menuCategories);
-            List<Menu> recommendMenus = new ArrayList<>();
-            for (Coach coach : coaches) {
-                Menu recommendMenu = recommendCategoryMenu(coach, category, recommendMenus);
-                menuRecommendRepository.save(MenuRecommend.create(dayOfWeek, category, coach, recommendMenu));
-            }
-        }
+        List<String> menuCategoriesByWeek = new ArrayList<>();
+        recommendMenuByDayOfWeek(categoryCount, menuCategoriesByWeek, coaches);
+        return getRecommendResultDto(coaches, menuCategoriesByWeek);
+    }
 
+    private RecommendResultDto getRecommendResultDto(List<Coach> coaches, List<String> menuCategoriesByWeek) {
         List<CoachRecommendResultDto> coachRecommendResultDtos = new ArrayList<>();
         for (Coach coach : coaches) {
             List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
@@ -67,7 +59,21 @@ public class MenuRecommendService {
                     .toList();
             coachRecommendResultDtos.add(CoachRecommendResultDto.of(coach.getName(), recommendMenuNames));
         }
-        return RecommendResultDto.of(menuCategories, coachRecommendResultDtos);
+        return RecommendResultDto.of(menuCategoriesByWeek, coachRecommendResultDtos);
+    }
+
+    private void recommendMenuByDayOfWeek(Map<MenuCategory, Integer> categoryCount, List<String> menuCategoriesByWeek, List<Coach> coaches) {
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            if (dayOfWeek.equals(DayOfWeek.SATURDAY)) {
+                break;
+            }
+            MenuCategory category = recommendMenuCategory(categoryCount, menuCategoriesByWeek);
+            List<Menu> recommendMenus = new ArrayList<>();
+            for (Coach coach : coaches) {
+                Menu recommendMenu = recommendCategoryMenu(coach, category, recommendMenus);
+                menuRecommendRepository.save(MenuRecommend.create(dayOfWeek, category, coach, recommendMenu));
+            }
+        }
     }
 
     private Menu recommendCategoryMenu(Coach coach, MenuCategory category, List<Menu> recommendMenus) {
