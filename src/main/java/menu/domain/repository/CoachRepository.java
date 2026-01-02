@@ -5,7 +5,7 @@ import menu.domain.model.Coach;
 import java.util.*;
 
 public class CoachRepository {
-    private final Map<String, Coach> coaches = new HashMap<>();
+    private final Map<String, Coach> coaches = new LinkedHashMap<>();
 
     public CoachRepository() {}
 
