@@ -33,7 +33,7 @@ public class MenuController {
     }
 
     public void run() {
-        // 메뉴 초기화
+        outputView.outputStartMessage();
         initialService.initialMenu();
 
         // 코치 이름 입력 및 초기화
