@@ -48,20 +48,6 @@ public class MenuRecommendService {
         return getRecommendResultDto(coaches, menuCategoriesByWeek);
     }
 
-    private RecommendResultDto getRecommendResultDto(List<Coach> coaches, List<String> menuCategoriesByWeek) {
-        List<CoachRecommendResultDto> coachRecommendResultDtos = new ArrayList<>();
-        for (Coach coach : coaches) {
-            List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
-            List<String> recommendMenuNames = menuRecommends.stream()
-                    .sorted(Comparator.comparing(MenuRecommend::getDayOfWeek))
-                    .map(MenuRecommend::getMenu)
-                    .map(Menu::getName)
-                    .toList();
-            coachRecommendResultDtos.add(CoachRecommendResultDto.of(coach.getName(), recommendMenuNames));
-        }
-        return RecommendResultDto.of(menuCategoriesByWeek, coachRecommendResultDtos);
-    }
-
     private void recommendMenuByDayOfWeek(Map<MenuCategory, Integer> categoryCount, List<String> menuCategoriesByWeek, List<Coach> coaches) {
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
             if (dayOfWeek.equals(DayOfWeek.SATURDAY)) {
@@ -125,5 +111,19 @@ public class MenuRecommendService {
             }
         }
         return category;
+    }
+
+    private RecommendResultDto getRecommendResultDto(List<Coach> coaches, List<String> menuCategoriesByWeek) {
+        List<CoachRecommendResultDto> coachRecommendResultDtos = new ArrayList<>();
+        for (Coach coach : coaches) {
+            List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
+            List<String> recommendMenuNames = menuRecommends.stream()
+                    .sorted(Comparator.comparing(MenuRecommend::getDayOfWeek))
+                    .map(MenuRecommend::getMenu)
+                    .map(Menu::getName)
+                    .toList();
+            coachRecommendResultDtos.add(CoachRecommendResultDto.of(coach.getName(), recommendMenuNames));
+        }
+        return RecommendResultDto.of(menuCategoriesByWeek, coachRecommendResultDtos);
     }
 }
