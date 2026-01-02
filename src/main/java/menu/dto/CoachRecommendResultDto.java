@@ -10,6 +10,10 @@ public record CoachRecommendResultDto(
         return new CoachRecommendResultDto(coachName, recommendMenus);
     }
 
+    public void addMenuName(String menuName) {
+        recommendMenus.add(menuName);
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

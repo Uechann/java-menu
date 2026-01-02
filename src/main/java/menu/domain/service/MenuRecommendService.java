@@ -37,78 +37,22 @@ public class MenuRecommendService {
     }
 
     public RecommendResultDto recommendMenu() {
-        // 월화수목금 순서대로 진행
-        // 카테고리 먼저 랜덤으로 선택
-        // 카테고리 카운트
         Map<MenuCategory, Integer> categoryCount = new EnumMap<>(MenuCategory.class);
         for (MenuCategory menuCategory : MenuCategory.values()) {
             categoryCount.put(menuCategory, 0);
         }
 
         List<Coach> coaches = coachRepository.findAll();
-
-        // 카테고리 리스트 구현
         List<String> menuCategories = new ArrayList<>();
         // 요일별 진행
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-
             if (dayOfWeek.equals(DayOfWeek.SATURDAY)) {
                 break;
             }
-
-            MenuCategory category;
-            while (true) {
-                int number = randomNumberGenerator.generate();
-                category = Arrays.stream(MenuCategory.values())
-                        .filter(menuCategory -> menuCategory.getSequence().equals(number))
-                        .findFirst()
-                        .orElse(null);
-
-                // 최대 2회가 넘는지 검증
-                int count = categoryCount.get(category);
-                if (count < 2) {
-                    categoryCount.replace(category, count + 1);
-//                    System.out.println(dayOfWeek+"요일 " + "카테고리: " + category.getName());
-                    menuCategories.add(category.getName());
-                    break;
-                }
-            }
-
-            // 요일, 카테고리 별 코치 한명의 메뉴 추천
-            // 코치들 전부 조회
-            // 각 코치별 메뉴 하나씩 추천
+            MenuCategory category = recommendMenuCategory(categoryCount, menuCategories);
             List<Menu> recommendMenus = new ArrayList<>();
             for (Coach coach : coaches) {
-                Menu recommendMenu;
-
-                while (true) {
-                    List<Menu> categoryMenus = menuRepository.findByCategory(category);
-                    List<String> MenuNames = categoryMenus.stream()
-                            .map(Menu::getName)
-                            .toList();
-
-                    String menu = Randoms.shuffle(MenuNames).get(0);
-                    // 못 먹는 음식 조회
-                    CoachMenuCanNot coachMenuCanNot = coachMenuCanNotRepository.findByCoach(coach)
-                            .orElse(null);
-
-                    // 추천했던 메뉴인지 조회
-                    List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
-                    List<String> recommendMenuNames = menuRecommends.stream()
-                            .map(MenuRecommend::getMenu)
-                            .map(Menu::getName)
-                            .toList();
-
-                    // 못먹는 음식이 아니고 추천 했던 메뉴가 아니면 break
-                    if ((coachMenuCanNot == null || !coachMenuCanNot.containsMenu(menu))
-                            && !recommendMenuNames.contains(menu)) {
-                        recommendMenu = menuRepository.findByName(menu);
-//                        System.out.println(dayOfWeek+"요일" + "카테고리: " + category.getName() + "코치: " + coach.getName() + " 메뉴:" + recommendMenu.getName());
-                        recommendMenus.add(recommendMenu);
-                        break;
-                    }
-                }
-
+                Menu recommendMenu = recommendCategoryMenu(coach, category, recommendMenus);
                 menuRecommendRepository.save(MenuRecommend.create(dayOfWeek, category, coach, recommendMenu));
             }
         }
@@ -121,10 +65,59 @@ public class MenuRecommendService {
                     .map(MenuRecommend::getMenu)
                     .map(Menu::getName)
                     .toList();
-
             coachRecommendResultDtos.add(CoachRecommendResultDto.of(coach.getName(), recommendMenuNames));
         }
-
         return RecommendResultDto.of(menuCategories, coachRecommendResultDtos);
+    }
+
+    private Menu recommendCategoryMenu(Coach coach, MenuCategory category, List<Menu> recommendMenus) {
+        Menu recommendMenu;
+        while (true) {
+            List<Menu> categoryMenus = menuRepository.findByCategory(category);
+            List<String> MenuNames = categoryMenus.stream()
+                    .map(Menu::getName)
+                    .toList();
+
+            String menu = Randoms.shuffle(MenuNames).get(0);
+            // 못 먹는 음식 조회
+            CoachMenuCanNot coachMenuCanNot = coachMenuCanNotRepository.findByCoach(coach)
+                    .orElse(null);
+
+            // 추천했던 메뉴인지 조회
+            List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
+            List<String> recommendMenuNames = menuRecommends.stream()
+                    .map(MenuRecommend::getMenu)
+                    .map(Menu::getName)
+                    .toList();
+
+            // 못먹는 음식이 아니고 추천 했던 메뉴가 아니면 break
+            if ((coachMenuCanNot == null || !coachMenuCanNot.containsMenu(menu))
+                    && !recommendMenuNames.contains(menu)) {
+                recommendMenu = menuRepository.findByName(menu);
+                recommendMenus.add(recommendMenu);
+                break;
+            }
+        }
+        return recommendMenu;
+    }
+
+    private MenuCategory recommendMenuCategory(Map<MenuCategory, Integer> categoryCount, List<String> menuCategories) {
+        MenuCategory category;
+        while (true) {
+            int number = randomNumberGenerator.generate();
+            category = Arrays.stream(MenuCategory.values())
+                    .filter(menuCategory -> menuCategory.getSequence().equals(number))
+                    .findFirst()
+                    .orElse(null);
+
+            // 최대 2회가 넘는지 검증
+            int count = categoryCount.get(category);
+            if (count < 2) {
+                categoryCount.replace(category, count + 1);
+                menuCategories.add(category.getName());
+                break;
+            }
+        }
+        return category;
     }
 }

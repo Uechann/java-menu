@@ -36,15 +36,14 @@ public class MenuController {
         outputView.outputStartMessage();
         initialService.initialMenu();
 
-        // 코치 이름 입력 및 초기화
-        List<String> coaches = retry(() -> {
-            String coachNamesInput = inputView.inputCoachNames();
-            inputValidator.validateCoachNames(coachNamesInput);
-            List<String> coachNames = coachNameParser.parse(coachNamesInput);
-            return initialService.initialCoach(coachNames);
-        });
+        List<String> coaches = inputCoachNamesAndInitialize();
+        inputCoachMenuCanNot(coaches);
 
-        // 코치 못먹는 음식 입력
+        RecommendResultDto recommendResultDto = menuRecommendService.recommendMenu();
+        outputView.outputMenuRecommendResult(recommendResultDto);
+    }
+
+    private void inputCoachMenuCanNot(List<String> coaches) {
         Object retry = retry(() -> {
             for (String coachName : coaches) {
                 String coachMenuCanNot = inputView.inputCoachMenuCanNot(coachName);
@@ -54,9 +53,15 @@ public class MenuController {
             }
             return null;
         });
+    }
 
-        // 메뉴 추천
-        RecommendResultDto recommendResultDto = menuRecommendService.recommendMenu();
-        outputView.outputMenuRecommendResult(recommendResultDto);
+    private List<String> inputCoachNamesAndInitialize() {
+        // 코치 이름 입력 및 초기화
+        return retry(() -> {
+            String coachNamesInput = inputView.inputCoachNames();
+            inputValidator.validateCoachNames(coachNamesInput);
+            List<String> coachNames = coachNameParser.parse(coachNamesInput);
+            return initialService.initialCoach(coachNames);
+        });
     }
 }
