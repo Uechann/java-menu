@@ -11,7 +11,6 @@ import menu.dto.CoachRecommendResultDto;
 import menu.dto.RecommendResultDto;
 import menu.global.util.NumberGenerator;
 
-import java.awt.*;
 import java.time.DayOfWeek;
 import java.util.*;
 import java.util.List;
@@ -48,8 +47,15 @@ public class MenuRecommendService {
 
         List<Coach> coaches = coachRepository.findAll();
 
+        // 카테고리 리스트 구현
+        List<String> menuCategories = new ArrayList<>();
         // 요일별 진행
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+
+            if (dayOfWeek.equals(DayOfWeek.SATURDAY)) {
+                break;
+            }
+
             MenuCategory category;
             while (true) {
                 int number = randomNumberGenerator.generate();
@@ -62,6 +68,8 @@ public class MenuRecommendService {
                 int count = categoryCount.get(category);
                 if (count < 2) {
                     categoryCount.replace(category, count + 1);
+//                    System.out.println(dayOfWeek+"요일 " + "카테고리: " + category.getName());
+                    menuCategories.add(category.getName());
                     break;
                 }
             }
@@ -69,31 +77,34 @@ public class MenuRecommendService {
             // 요일, 카테고리 별 코치 한명의 메뉴 추천
             // 코치들 전부 조회
             // 각 코치별 메뉴 하나씩 추천
+            List<Menu> recommendMenus = new ArrayList<>();
             for (Coach coach : coaches) {
                 Menu recommendMenu;
 
                 while (true) {
-                    List<Menu> allMenus = menuRepository.findAll();
-                    List<String> MenuNames = allMenus.stream()
+                    List<Menu> categoryMenus = menuRepository.findByCategory(category);
+                    List<String> MenuNames = categoryMenus.stream()
                             .map(Menu::getName)
                             .toList();
 
                     String menu = Randoms.shuffle(MenuNames).get(0);
-                    // 못 먹는 음식인지 검사 -> 못먹는 음식이 없으면 통과
+                    // 못 먹는 음식 조회
                     CoachMenuCanNot coachMenuCanNot = coachMenuCanNotRepository.findByCoach(coach)
                             .orElse(null);
 
-                    // 추천했던 메뉴인지 검사
+                    // 추천했던 메뉴인지 조회
                     List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
                     List<String> recommendMenuNames = menuRecommends.stream()
                             .map(MenuRecommend::getMenu)
                             .map(Menu::getName)
                             .toList();
 
-                    // 추천 했던 메뉴가 아니고 못먹는 음식이 아니면 break
+                    // 못먹는 음식이 아니고 추천 했던 메뉴가 아니면 break
                     if ((coachMenuCanNot == null || !coachMenuCanNot.containsMenu(menu))
                             && !recommendMenuNames.contains(menu)) {
                         recommendMenu = menuRepository.findByName(menu);
+//                        System.out.println(dayOfWeek+"요일" + "카테고리: " + category.getName() + "코치: " + coach.getName() + " 메뉴:" + recommendMenu.getName());
+                        recommendMenus.add(recommendMenu);
                         break;
                     }
                 }
@@ -106,6 +117,7 @@ public class MenuRecommendService {
         for (Coach coach : coaches) {
             List<MenuRecommend> menuRecommends = menuRecommendRepository.findByCoach(coach);
             List<String> recommendMenuNames = menuRecommends.stream()
+                    .sorted(Comparator.comparing(MenuRecommend::getDayOfWeek))
                     .map(MenuRecommend::getMenu)
                     .map(Menu::getName)
                     .toList();
@@ -113,6 +125,6 @@ public class MenuRecommendService {
             coachRecommendResultDtos.add(CoachRecommendResultDto.of(coach.getName(), recommendMenuNames));
         }
 
-        return RecommendResultDto.of(coachRecommendResultDtos);
+        return RecommendResultDto.of(menuCategories, coachRecommendResultDtos);
     }
 }

@@ -18,7 +18,7 @@ public class OutputView {
     public void outputMenuRecommendResult(RecommendResultDto recommendResultDto) {
         System.out.println("메뉴 추천 결과입니다.\n");
         System.out.println("[ 구분 | 월요일 | 화요일 | 수요일 | 목요일 | 금요일 ]");
-        System.out.println("[ 카테고리 | 한식 | 한식 | 일식 | 중식 | 아시안 ]");
+        //TODO: 요일별 카테고리 컬럼
         System.out.println(recommendResultDto.toString());
         System.out.println("추천을 완료했습니다.");
     }
